@@ -14,7 +14,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import { housingData } from './data/housingData';
 
-const years = Array.from({ length: 26 }, (_, i) => 2000 + i);
+const years = Array.from({ length: 27 }, (_, i) => 2000 + i);
 
 const formatNumber = (value: number) => new Intl.NumberFormat('ru-RU').format(value);
 
@@ -54,7 +54,7 @@ type ChartType = 'salary-price' | 'rent' | 'affordability' | 'rent-share' | 'com
 
 export default function App() {
   const [startYear, setStartYear] = useState(2000);
-  const [endYear, setEndYear] = useState(2025);
+  const [endYear, setEndYear] = useState(2026);
   const [activeChart, setActiveChart] = useState<ChartType>('salary-price');
 
   const filteredData = useMemo(() => {
@@ -87,7 +87,7 @@ export default function App() {
             Доступность жилья
           </h1>
           <p className="text-sm text-neutral-500 mt-2">
-            Россия · 2000–2025 · помесячные данные
+            Россия · 2000–2026 · помесячные данные
           </p>
           <div className="flex gap-1 mt-4">
             <span className="w-8 h-0.5 rounded-full" style={{ background: C.blue }} />
@@ -119,9 +119,9 @@ export default function App() {
           </div>
           <div className="flex gap-1 ml-auto">
             {[
-              { label: '2000–2025', s: 2000, e: 2025 },
+              { label: '2000–2026', s: 2000, e: 2026 },
               { label: '2010–2020', s: 2010, e: 2020 },
-              { label: '2020–2025', s: 2020, e: 2025 },
+              { label: '2020–2026', s: 2020, e: 2026 },
             ].map((p) => (
               <button
                 key={p.label}
