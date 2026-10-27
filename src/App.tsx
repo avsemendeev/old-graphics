@@ -27,11 +27,27 @@ const formatCurrency = (value: number) => {
 const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
 const formatMonthTick = (value: string) => {
+  // Метка показывается только на январских тиках — выводим год (2001, 2002, ...)
   const [year, month] = value.split('-');
-  const m = parseInt(month);
-  if (m === 1) return year;
-  if (m === 7) return 'Июл';
+  if (parseInt(month) === 1) return year;
   return '';
+};
+
+// Метки оси X: январь каждого года (при длинном периоде — через каждые ~3 года, чтобы не сливались)
+const yearTicks = (data: any[]) => {
+  const yearsWithData = [...new Set(data.map((d) => d.month.split('-')[0]))];
+  const step = yearsWithData.length > 15 ? 3 : yearsWithData.length > 8 ? 2 : 1;
+  const ticks: string[] = [];
+  let lastYear = -1;
+  for (const d of data) {
+    const [yStr, mStr] = d.month.split('-');
+    const y = parseInt(yStr);
+    if (parseInt(mStr) === 1 && (y - lastYear) >= step) {
+      ticks.push(d.month);
+      lastYear = y;
+    }
+  }
+  return ticks;
 };
 
 type ChartType = 'salary-price' | 'rent' | 'affordability' | 'rent-share' | 'combined' | 'apartment-cost';
@@ -256,7 +272,7 @@ function SalaryPriceChart({ data }: { data: any[] }) {
       <ResponsiveContainer width="100%" height={360}>
         <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis yAxisId="left" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <YAxis yAxisId="right" orientation="right" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
@@ -280,7 +296,7 @@ function RentChart({ data }: { data: any[] }) {
       <ResponsiveContainer width="100%" height={360}>
         <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis yAxisId="left" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <YAxis yAxisId="right" orientation="right" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
@@ -310,7 +326,7 @@ function AffordabilityChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis tick={axisStyle} domain={['dataMin - 1', 'dataMax + 1']} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="yearsToBuy" name="Лет" stroke={C.lavender} strokeWidth={1.5} fill="url(#gAff)" dot={false} />
@@ -334,7 +350,7 @@ function RentShareChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis tick={axisStyle} domain={[0, 100]} tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="rentShareOfSalary" name="Доля" stroke={C.coral} strokeWidth={1.5} fill="url(#gShare)" dot={false} />
@@ -358,7 +374,7 @@ function ApartmentCostChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis tick={axisStyle} tickFormatter={(v) => `${(v / 1000000).toFixed(1)} млн`} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="apartmentCost54" name="Стоимость" stroke={C.coral} strokeWidth={1.5} fill="url(#gCost)" dot={false} />
@@ -388,7 +404,7 @@ function CombinedChart({ data }: { data: any[] }) {
           margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
         >
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} ticks={yearTicks(data)} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
           <YAxis tick={axisStyle} tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false} width={50} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Line type="monotone" dataKey="salary" name="Зарплата" stroke={C.blue} strokeWidth={1.5} dot={false} />
