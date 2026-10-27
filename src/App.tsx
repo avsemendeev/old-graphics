@@ -49,7 +49,7 @@ export default function App() {
   }, [startYear, endYear]);
 
   const chartTabs: { id: ChartType; label: string }[] = [
-    { id: 'salary-price', label: 'Зарплата и цена м²' },
+    { id: 'salary-price', label: 'Сравнение цен' },
     { id: 'rent', label: 'Зарплата и аренда' },
     { id: 'affordability', label: 'Доступность' },
     { id: 'rent-share', label: 'Доля аренды' },
@@ -251,7 +251,7 @@ const C = {
 function SalaryPriceChart({ data }: { data: any[] }) {
   return (
     <div>
-      <h3 className="text-lg font-light mb-1">Зарплата и цена за м²</h3>
+      <h3 className="text-lg font-light mb-1">Сравнение цен</h3>
       <p className="text-xs text-neutral-500 mb-6">Помесячно, ₽</p>
       <ResponsiveContainer width="100%" height={360}>
         <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
