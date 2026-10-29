@@ -26,13 +26,11 @@ const formatCurrency = (value: number) => {
 
 const monthNames = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 
-const formatMonthTick = (value: string) => {
-  const [year, month] = value.split('-');
-  const m = parseInt(month);
-  if (m === 1) return year;
-  if (m === 7) return 'Июл';
-  return '';
-};
+// Метки оси X — только годы (2000, 2001, 2002, ...)
+const formatYearTick = (value: string) => value.split('-')[0];
+
+const yearTicks = (data: any[]) =>
+  data.filter((d) => d.month.endsWith('-01')).map((d) => d.month);
 
 type ChartType = 'salary-price' | 'rent' | 'affordability' | 'rent-share' | 'combined' | 'apartment-cost';
 
@@ -240,6 +238,14 @@ function CustomTooltip({ active, payload, label }: any) {
 
 const axisStyle = { fill: '#a3a3a3', fontSize: 11 };
 
+// Подпись оси X — «Годы» на всех графиках
+const xAxisLabel = {
+  value: 'Годы',
+  position: 'insideBottom' as const,
+  offset: -2,
+  style: { fill: '#737373', fontSize: 12, textAnchor: 'middle' as const },
+};
+
 // Приглушённая палитра
 const C = {
   blue: '#2d5a87',
@@ -254,9 +260,9 @@ function SalaryPriceChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-light mb-1">Сравнение цен</h3>
       <p className="text-xs text-neutral-500 mb-6">Помесячно, ₽</p>
       <ResponsiveContainer width="100%" height={360}>
-        <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis yAxisId="left" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <YAxis yAxisId="right" orientation="right" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
@@ -278,9 +284,9 @@ function RentChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-light mb-1">Зарплата и аренда</h3>
       <p className="text-xs text-neutral-500 mb-6">Аренда 1-комнатной квартиры · Сравнение динамики, ₽</p>
       <ResponsiveContainer width="100%" height={360}>
-        <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <ComposedChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis yAxisId="left" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <YAxis yAxisId="right" orientation="right" tick={axisStyle} tickFormatter={formatCurrency} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
@@ -302,7 +308,7 @@ function AffordabilityChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-light mb-1">Доступность покупки</h3>
       <p className="text-xs text-neutral-500 mb-6">Лет накоплений для квартиры 54 м²</p>
       <ResponsiveContainer width="100%" height={360}>
-        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="gAff" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={C.lavender} stopOpacity={0.15} />
@@ -310,7 +316,7 @@ function AffordabilityChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis tick={axisStyle} domain={['dataMin - 1', 'dataMax + 1']} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="yearsToBuy" name="Лет" stroke={C.lavender} strokeWidth={1.5} fill="url(#gAff)" dot={false} />
@@ -326,7 +332,7 @@ function RentShareChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-light mb-1">Доля аренды в зарплате</h3>
       <p className="text-xs text-neutral-500 mb-6">Процент зарплаты на аренду 1-комнатной</p>
       <ResponsiveContainer width="100%" height={360}>
-        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="gShare" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={C.coral} stopOpacity={0.15} />
@@ -334,7 +340,7 @@ function RentShareChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis tick={axisStyle} domain={[0, 100]} tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false} width={40} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="rentShareOfSalary" name="Доля" stroke={C.coral} strokeWidth={1.5} fill="url(#gShare)" dot={false} />
@@ -350,7 +356,7 @@ function ApartmentCostChart({ data }: { data: any[] }) {
       <h3 className="text-lg font-light mb-1">Стоимость квартиры 54 м²</h3>
       <p className="text-xs text-neutral-500 mb-6">Помесячно</p>
       <ResponsiveContainer width="100%" height={360}>
-        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+        <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 20 }}>
           <defs>
             <linearGradient id="gCost" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={C.coral} stopOpacity={0.15} />
@@ -358,7 +364,7 @@ function ApartmentCostChart({ data }: { data: any[] }) {
             </linearGradient>
           </defs>
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis tick={axisStyle} tickFormatter={(v) => `${(v / 1000000).toFixed(1)} млн`} axisLine={false} tickLine={false} width={55} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Area type="monotone" dataKey="apartmentCost54" name="Стоимость" stroke={C.coral} strokeWidth={1.5} fill="url(#gCost)" dot={false} />
@@ -385,10 +391,10 @@ function CombinedChart({ data }: { data: any[] }) {
               apartmentCost54: Number(((d.apartmentCost54 / first.apartmentCost54) * 100).toFixed(1)),
             };
           })}
-          margin={{ top: 5, right: 10, left: 0, bottom: 5 }}
+          margin={{ top: 5, right: 10, left: 0, bottom: 20 }}
         >
           <CartesianGrid stroke="#f5f5f5" vertical={false} />
-          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatMonthTick} interval="preserveStartEnd" axisLine={{ stroke: '#e5e5e5' }} tickLine={false} />
+          <XAxis dataKey="month" tick={axisStyle} tickFormatter={formatYearTick} interval={0} axisLine={{ stroke: '#e5e5e5' }} tickLine={false} label={xAxisLabel} minTickGap={0} ticks={yearTicks(data)} />
           <YAxis tick={axisStyle} tickFormatter={(v) => `${v}%`} axisLine={false} tickLine={false} width={50} />
           <Tooltip content={<CustomTooltip />} cursor={{ stroke: '#d4d4d4' }} />
           <Line type="monotone" dataKey="salary" name="Зарплата" stroke={C.blue} strokeWidth={1.5} dot={false} />
